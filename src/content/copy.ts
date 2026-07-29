@@ -95,7 +95,9 @@ interface Copy {
       submit: string;
       required: string;
       invalidEmail: string;
+      sending: string;
       success: string;
+      error: string;
       helper: string;
     };
   };
@@ -559,7 +561,7 @@ const en: Copy = {
       email: "Work email",
       emailPlaceholder: "",
       company: "Company",
-      companyPlaceholder: "Company name",
+      companyPlaceholder: "",
       interest: "Area of interest",
       interestPlaceholder: "Select a practice area",
       message: "How can we help?",
@@ -567,9 +569,11 @@ const en: Copy = {
       submit: "Send message",
       required: "This field is required.",
       invalidEmail: "Enter a valid email address.",
-      success: "Your email client is opening with the message ready to send.",
+      sending: "Sending…",
+      success: "Thank you. Your message has been sent to the Xeronia team.",
+      error: "We could not send your message. Please try again or email contact@xeronia.ai.",
       helper:
-        "Submitting opens a pre-filled email to our team. Prefer to write directly? Use the address above.",
+        "Your message is sent securely to our team. We typically respond within one business day.",
     },
   },
   footer: {
@@ -794,7 +798,7 @@ const es: Copy = {
       email: "Correo corporativo",
       emailPlaceholder: "",
       company: "Empresa",
-      companyPlaceholder: "Nombre de la empresa",
+      companyPlaceholder: "",
       interest: "Área de interés",
       interestPlaceholder: "Seleccione un área de práctica",
       message: "¿Cómo podemos ayudar?",
@@ -802,9 +806,11 @@ const es: Copy = {
       submit: "Enviar mensaje",
       required: "Este campo es obligatorio.",
       invalidEmail: "Ingrese un correo electrónico válido.",
-      success: "Se está abriendo su cliente de correo con el mensaje listo para enviar.",
+      sending: "Enviando…",
+      success: "Gracias. Su mensaje fue enviado al equipo de Xeronia.",
+      error: "No pudimos enviar su mensaje. Inténtelo de nuevo o escriba a contact@xeronia.ai.",
       helper:
-        "Al enviar se abre un correo prellenado a nuestro equipo. ¿Prefiere escribir directamente? Use la dirección indicada.",
+        "Su mensaje se envía de forma segura a nuestro equipo. Normalmente respondemos en un día hábil.",
     },
   },
   footer: {

@@ -40,3 +40,7 @@ firebase deploy --only hosting
 ```
 
 The contact form currently opens the visitor's configured email application. It does not yet submit through a Firebase Function or email provider.
+
+## Contact form
+
+The site now includes a Firebase Functions + App Check + reCAPTCHA Enterprise + Resend contact pipeline. Follow `CONTACT_FORM_SETUP.md` before deploying the function.
