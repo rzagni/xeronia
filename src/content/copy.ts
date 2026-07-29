@@ -555,9 +555,9 @@ const en: Copy = {
     websiteLabel: "Website",
     form: {
       name: "Full name",
-      namePlaceholder: "Jordan Rivera",
+      namePlaceholder: "",
       email: "Work email",
-      emailPlaceholder: "jordan@company.com",
+      emailPlaceholder: "",
       company: "Company",
       companyPlaceholder: "Company name",
       interest: "Area of interest",
@@ -790,9 +790,9 @@ const es: Copy = {
     websiteLabel: "Sitio web",
     form: {
       name: "Nombre completo",
-      namePlaceholder: "Jordan Rivera",
+      namePlaceholder: "",
       email: "Correo corporativo",
-      emailPlaceholder: "jordan@empresa.com",
+      emailPlaceholder: "",
       company: "Empresa",
       companyPlaceholder: "Nombre de la empresa",
       interest: "Área de interés",

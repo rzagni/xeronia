@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "xeronia-website"
+  },
+  "targets": {
+    "xeronia-website": {
+      "hosting": {
+        "live": [
+          "xeronia-website"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
