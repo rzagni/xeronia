@@ -1,8 +1,5 @@
 import { getApp, getApps, initializeApp } from "firebase/app";
-import {
-  ReCaptchaV3Provider,
-  initializeAppCheck,
-} from "firebase/app-check";
+import { ReCaptchaV3Provider, initializeAppCheck } from "firebase/app-check";
 import { getFunctions } from "firebase/functions";
 
 const firebaseConfig = {
@@ -19,9 +16,7 @@ const missingConfig = Object.entries(firebaseConfig)
   .map(([key]) => key);
 
 if (missingConfig.length > 0) {
-  throw new Error(
-    `Missing Firebase configuration: ${missingConfig.join(", ")}`,
-  );
+  throw new Error(`Missing Firebase configuration: ${missingConfig.join(", ")}`);
 }
 
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -29,10 +24,15 @@ const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const appCheckSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 if (appCheckSiteKey) {
-  if (import.meta.env.DEV && import.meta.env.VITE_APPCHECK_DEBUG_TOKEN) {
+  if (import.meta.env.DEV) {
+    const configuredDebugToken =
+      import.meta.env.VITE_APPCHECK_DEBUG_TOKEN?.trim();
+
     Object.assign(globalThis, {
       FIREBASE_APPCHECK_DEBUG_TOKEN:
-        import.meta.env.VITE_APPCHECK_DEBUG_TOKEN,
+        configuredDebugToken && configuredDebugToken !== "true"
+          ? configuredDebugToken
+          : true,
     });
   }
 

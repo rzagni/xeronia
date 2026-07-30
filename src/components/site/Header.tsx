@@ -1,7 +1,13 @@
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { copy } from "@/content/copy";
-import { pageKeys, pathFor, otherLocale, type Locale, type PageKey } from "@/lib/i18n";
+import {
+  pageKeys,
+  pathFor,
+  otherLocale,
+  type Locale,
+  type PageKey,
+} from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export function Header({ locale, page }: { locale: Locale; page: PageKey }) {
@@ -48,7 +54,9 @@ export function Header({ locale, page }: { locale: Locale; page: PageKey }) {
                 href={pathFor(locale, key)}
                 className={cn(
                   "link-underline text-[0.95rem] font-medium transition-colors",
-                  page === key ? "text-primary" : "text-foreground/75 hover:text-navy",
+                  page === key
+                    ? "text-primary"
+                    : "text-foreground/75 hover:text-navy",
                 )}
                 aria-current={page === key ? "page" : undefined}
               >
@@ -61,25 +69,49 @@ export function Header({ locale, page }: { locale: Locale; page: PageKey }) {
           <a
             href={pathFor(other, page)}
             aria-label={t.languageLabel}
-            className="hidden rounded-md border border-border px-3 py-2 text-sm font-semibold tracking-wide text-foreground/80 transition-colors hover:border-primary/40 hover:text-primary sm:inline-flex"
+            className="hidden min-h-11 items-center px-2 text-sm font-medium tracking-wide text-foreground/50 transition-colors hover:text-primary sm:inline-flex"
           >
-            {t.languageName}
+            <span
+              className={cn(
+                "transition-colors",
+                locale === "en" ? "text-foreground" : "text-foreground/45",
+              )}
+            >
+              EN
+            </span>
+            <span className="mx-1 text-foreground/25" aria-hidden="true">
+              /
+            </span>
+            <span
+              className={cn(
+                "transition-colors",
+                locale === "es" ? "text-foreground" : "text-foreground/45",
+              )}
+            >
+              ES
+            </span>
           </a>
+
           <a
             href={pathFor(locale, "contact")}
             className="hidden rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:brightness-110 hover:shadow-md active:scale-[0.98] lg:inline-flex"
           >
             {t.cta.primary}
           </a>
+
           <button
             type="button"
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => setOpen((value) => !value)}
             aria-expanded={open}
             aria-controls="mobile-nav"
             aria-label={open ? "Close menu" : "Open menu"}
             className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border text-navy transition-colors hover:bg-secondary lg:hidden"
           >
-            {open ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
+            {open ? (
+              <X className="size-5" aria-hidden="true" />
+            ) : (
+              <Menu className="size-5" aria-hidden="true" />
+            )}
           </button>
         </div>
       </div>
@@ -105,13 +137,30 @@ export function Header({ locale, page }: { locale: Locale; page: PageKey }) {
                 </a>
               </li>
             ))}
+
             <li>
               <a
                 href={pathFor(other, page)}
                 aria-label={t.languageLabel}
-                className="flex min-h-12 items-center text-base font-medium text-foreground/80"
+                className="flex min-h-12 items-center text-base font-medium"
               >
-                {t.languageName}
+                <span
+                  className={cn(
+                    locale === "en" ? "text-foreground" : "text-foreground/45",
+                  )}
+                >
+                  EN
+                </span>
+                <span className="mx-1.5 text-foreground/25" aria-hidden="true">
+                  /
+                </span>
+                <span
+                  className={cn(
+                    locale === "es" ? "text-foreground" : "text-foreground/45",
+                  )}
+                >
+                  ES
+                </span>
               </a>
             </li>
           </ul>

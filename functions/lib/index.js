@@ -1,87 +1,77 @@
-import { HttpsError, onCall } from "firebase-functions/v2/https";
-import { defineSecret } from "firebase-functions/params";
-import { logger } from "firebase-functions";
-import { Resend } from "resend";
-import { z } from "zod";
-
-const resendApiKey = defineSecret("RESEND_API_KEY");
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.submitContactInquiry = void 0;
+const https_1 = require("firebase-functions/v2/https");
+const params_1 = require("firebase-functions/params");
+const firebase_functions_1 = require("firebase-functions");
+const resend_1 = require("resend");
+const zod_1 = require("zod");
+const resendApiKey = (0, params_1.defineSecret)("RESEND_API_KEY");
 const CONTACT_RECIPIENT = "contact@xeronia.ai";
 const CONTACT_SENDER = "Xeronia Website <website@xeronia.ai>";
-
-const inquirySchema = z.object({
-  name: z.string().trim().min(1).max(120),
-  email: z.string().trim().email().max(254),
-  company: z.string().trim().max(160).default(""),
-  interest: z.string().trim().max(160).default(""),
-  message: z.string().trim().min(10).max(5000),
-  website: z.string().trim().max(500).default(""),
-  locale: z.enum(["en", "es"]).default("en"),
-  startedAt: z.number().int().positive(),
+const inquirySchema = zod_1.z.object({
+    name: zod_1.z.string().trim().min(1).max(120),
+    email: zod_1.z.string().trim().email().max(254),
+    company: zod_1.z.string().trim().max(160).default(""),
+    interest: zod_1.z.string().trim().max(160).default(""),
+    message: zod_1.z.string().trim().min(10).max(5000),
+    website: zod_1.z.string().trim().max(500).default(""),
+    locale: zod_1.z.enum(["en", "es"]).default("en"),
+    startedAt: zod_1.z.number().int().positive(),
 });
-
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+function escapeHtml(value) {
+    return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
-
-export const submitContactInquiry = onCall(
-  {
+exports.submitContactInquiry = (0, https_1.onCall)({
     region: "us-west1",
     memory: "256MiB",
     timeoutSeconds: 30,
     enforceAppCheck: true,
     secrets: [resendApiKey],
-  },
-  async (request) => {
+}, async (request) => {
     const parsed = inquirySchema.safeParse(request.data);
     if (!parsed.success) {
-      throw new HttpsError("invalid-argument", "Please review the form fields.");
+        throw new https_1.HttpsError("invalid-argument", "Please review the form fields.");
     }
-
     const inquiry = parsed.data;
-
     // Honeypot: silently acknowledge bot submissions without sending email.
     if (inquiry.website) {
-      logger.info("Contact honeypot triggered");
-      return { ok: true };
+        firebase_functions_1.logger.info("Contact honeypot triggered");
+        return { ok: true };
     }
-
     // Very fast submissions are usually automated. Silently accept to avoid teaching bots.
     const elapsedMs = Date.now() - inquiry.startedAt;
     if (elapsedMs >= 0 && elapsedMs < 1500) {
-      logger.info("Contact form submitted implausibly fast");
-      return { ok: true };
+        firebase_functions_1.logger.info("Contact form submitted implausibly fast");
+        return { ok: true };
     }
-
     const subjectCompany = inquiry.company || inquiry.name;
     const submittedAt = new Intl.DateTimeFormat("en-US", {
-      dateStyle: "medium",
-      timeStyle: "long",
-      timeZone: "America/Los_Angeles",
+        dateStyle: "medium",
+        timeStyle: "long",
+        timeZone: "America/Los_Angeles",
     }).format(new Date());
-
     const safe = {
-      name: escapeHtml(inquiry.name),
-      email: escapeHtml(inquiry.email),
-      company: escapeHtml(inquiry.company || "Not provided"),
-      interest: escapeHtml(inquiry.interest || "Not specified"),
-      message: escapeHtml(inquiry.message).replaceAll("\n", "<br>"),
-      submittedAt: escapeHtml(submittedAt),
+        name: escapeHtml(inquiry.name),
+        email: escapeHtml(inquiry.email),
+        company: escapeHtml(inquiry.company || "Not provided"),
+        interest: escapeHtml(inquiry.interest || "Not specified"),
+        message: escapeHtml(inquiry.message).replaceAll("\n", "<br>"),
+        submittedAt: escapeHtml(submittedAt),
     };
-
     try {
-      const resend = new Resend(resendApiKey.value());
-      const { error } = await resend.emails.send({
-        from: CONTACT_SENDER,
-        to: [CONTACT_RECIPIENT],
-        replyTo: inquiry.email,
-        subject: `Xeronia website inquiry — ${subjectCompany}`,
-        html: `
+        const resend = new resend_1.Resend(resendApiKey.value());
+        const { error } = await resend.emails.send({
+            from: CONTACT_SENDER,
+            to: [CONTACT_RECIPIENT],
+            replyTo: inquiry.email,
+            subject: `Xeronia website inquiry — ${subjectCompany}`,
+            html: `
           <div style="background:#f4f6f8;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;color:#172033">
             <div style="max-width:680px;margin:0 auto;background:#ffffff;border:1px solid #e3e8ef;border-radius:12px;overflow:hidden">
               <div style="background:#111827;padding:24px 28px">
@@ -120,29 +110,27 @@ export const submitContactInquiry = onCall(
             </div>
           </div>
         `,
-        text: [
-          "New Xeronia website inquiry",
-          `Name: ${inquiry.name}`,
-          `Email: ${inquiry.email}`,
-          `Company: ${inquiry.company || "Not provided"}`,
-          `Interest: ${inquiry.interest || "Not specified"}`,
-          "",
-          "Message:",
-          inquiry.message,
-          "",
-          "Submitted from: xeronia.ai",
-          `Submitted at: ${submittedAt}`,
-        ].join("\n"),
-      });
-
-      if (error) throw new Error(error.message);
-      return { ok: true };
-    } catch (error) {
-      logger.error("Failed to send contact inquiry email", error);
-      throw new HttpsError(
-        "internal",
-        "We could not send your message. Please try again.",
-      );
+            text: [
+                "New Xeronia website inquiry",
+                `Name: ${inquiry.name}`,
+                `Email: ${inquiry.email}`,
+                `Company: ${inquiry.company || "Not provided"}`,
+                `Interest: ${inquiry.interest || "Not specified"}`,
+                "",
+                "Message:",
+                inquiry.message,
+                "",
+                "Submitted from: xeronia.ai",
+                `Submitted at: ${submittedAt}`,
+            ].join("\n"),
+        });
+        if (error)
+            throw new Error(error.message);
+        return { ok: true };
     }
-  },
-);
+    catch (error) {
+        firebase_functions_1.logger.error("Failed to send contact inquiry email", error);
+        throw new https_1.HttpsError("internal", "We could not send your message. Please try again.");
+    }
+});
+//# sourceMappingURL=index.js.map

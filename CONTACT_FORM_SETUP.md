@@ -1,118 +1,100 @@
-# Xeronia contact form setup
+# Xeronia contact form setup — email only
 
-The implementation sends submissions to `contact@xeronia.ai` through a protected Firebase callable function. The sender is `Xeronia Website <website@send.xeronia.ai>` and the visitor's address is used as `Reply-To`.
+The contact form sends submissions directly to `contact@xeronia.ai` through a protected Firebase callable function. The sender is `Xeronia Website <website@send.xeronia.ai>` and the visitor's address is set as `Reply-To`.
+
+No Firestore database is required.
 
 ## Protection included
 
-- Firebase App Check with reCAPTCHA Enterprise
-- App Check enforcement on the Cloud Function
+- Firebase App Check using reCAPTCHA v3
+- App Check enforcement on the callable Cloud Function
 - hidden honeypot field
-- server-side schema and length validation
-- per-IP rate limit: 5 accepted attempts per hour
-- ten-minute duplicate suppression
-- Firestore audit record for every valid inquiry
-- Resend API key and rate-limit salt in Google Secret Manager
+- minimum form-completion-time check
+- server-side schema, email, and length validation
+- Resend API key stored in Google Secret Manager
 
-## 1. Register the Firebase Web App
+Because this version does not use a database or external rate-limit service, it does not provide durable per-IP rate limiting or duplicate suppression across Cloud Function instances.
 
-The Hosting deployment did not require a Firebase Web App, but the client SDK and App Check do.
+## 1. Frontend environment configuration
 
-In Firebase Console:
+Create `.env.local` in the project root using `.env.example` as the template. Add the Firebase Web App values and the public reCAPTCHA v3 site key.
 
-1. Open Project settings.
-2. Under **Your apps**, select the Web icon (`</>`).
-3. App nickname: `Xeronia Website`.
-4. Do not enable Firebase Hosting during app registration; Hosting is already configured.
-5. Copy the Firebase configuration values into a local `.env` file using `.env.example` as the template.
+Do not put the reCAPTCHA secret key or Resend API key in `.env.local`.
 
-Do not commit `.env`.
-
-## 2. Create Firestore
+## 2. Configure App Check
 
 In Firebase Console:
 
-1. Build > Firestore Database > Create database.
-2. Choose a production location close to the function region. The function is currently `us-west1`.
-3. Deploy the deny-all client rules included in this project:
+1. Open **App Check**.
+2. Register the `Xeronia Website` web app with **reCAPTCHA (v3)**.
+3. Paste the reCAPTCHA **secret key** into Firebase App Check.
+4. Put the corresponding public **site key** in `.env.local` as `VITE_RECAPTCHA_SITE_KEY`.
+5. Keep enforcement disabled until a successful test request appears in App Check metrics.
 
-```bash
-firebase deploy --only firestore
-```
+The function code uses `enforceAppCheck: true`. For the first deployment, either confirm App Check works locally or temporarily change it to `false`, deploy and test, then restore it to `true` and redeploy.
 
-The Admin SDK used by the Cloud Function bypasses client security rules.
+## 3. Configure Resend
 
-## 3. Configure App Check and reCAPTCHA Enterprise
-
-In Firebase Console:
-
-1. Security > App Check.
-2. Select the `Xeronia Website` web app.
-3. Register reCAPTCHA Enterprise.
-4. Add these allowed domains to the reCAPTCHA Enterprise key:
-   - `xeronia.ai`
-   - `www.xeronia.ai`
-   - `xeronia-website.web.app`
-   - `localhost` for development, or use a debug token instead
-5. Copy the site key to `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY` in `.env`.
-
-The function already uses `enforceAppCheck: true`; requests without a valid App Check token are rejected.
-
-For local development, register an App Check debug token in the Firebase console and place it in `VITE_APPCHECK_DEBUG_TOKEN` in `.env.local`.
-
-## 4. Configure Resend
-
-Create a Resend account, then add and verify the sending subdomain:
+In Resend, add and verify:
 
 ```text
 send.xeronia.ai
 ```
 
-Using a subdomain avoids interfering with the existing Mailgun SPF record on `xeronia.ai`. Add the exact SPF and DKIM records shown by Resend to Squarespace DNS. Do not replace or duplicate the existing apex SPF record.
+Add the exact SPF and DKIM records Resend provides to Squarespace DNS. Using the sending subdomain avoids changing the existing Mailgun SPF record on the root domain.
 
 Create a Resend API key with sending permission.
 
-## 5. Store server secrets
+## 4. Store the server secret
 
 From the project root:
 
 ```bash
+firebase use
 firebase functions:secrets:set RESEND_API_KEY
-firebase functions:secrets:set CONTACT_RATE_LIMIT_SALT
 ```
 
-For `CONTACT_RATE_LIMIT_SALT`, use a long random value. Generate one on macOS with:
+Confirm the active project is `xeronia-website`, then paste the Resend API key when prompted.
 
-```bash
-openssl rand -hex 32
-```
-
-## 6. Install, build and deploy
+## 5. Install and build
 
 ```bash
 npm install
 npm --prefix functions install
 npm run build:all
-firebase deploy --only firestore,functions,hosting
 ```
 
-Cloud Functions deployment requires the Firebase project to be on the Blaze billing plan because the function calls the external Resend API and uses Secret Manager.
+## 6. Deploy the function
 
-## 7. Test
+```bash
+firebase deploy --only functions
+```
 
-Submit from:
+Cloud Functions deployment requires the Firebase project to use the Blaze billing plan because the function calls the external Resend API and uses Secret Manager.
 
-- `https://xeronia.ai/contact`
-- the Spanish contact page
-- a private/incognito browser window
+## 7. Test before deploying Hosting
+
+Run:
+
+```bash
+npm run dev
+```
+
+Submit a real message from the local contact page. Wait at least two seconds after the form appears before submitting.
 
 Confirm:
 
-1. The page shows a success message without opening an email client.
-2. `contact@xeronia.ai` receives the message.
+1. The page displays its success state.
+2. `contact@xeronia.ai` receives the email.
 3. Replying targets the visitor's email address.
-4. Firestore contains a document in `contactInquiries` with status `emailed`.
-5. App Check metrics show valid requests.
+4. Firebase App Check metrics show a valid Functions request.
+5. Cloud Functions logs show no App Check or Resend errors.
 
-## Operations
+## 8. Deploy Hosting
 
-Valid inquiry records contain personal data. Establish a retention policy appropriate for Xeronia. The `_contactRateLimits` and `_contactDuplicates` collections include `expiresAt` fields; configure Firestore TTL policies for those fields so the documents are removed automatically.
+```bash
+npm run build
+firebase deploy --only hosting
+```
+
+Then repeat the test at `https://xeronia.ai/contact`.

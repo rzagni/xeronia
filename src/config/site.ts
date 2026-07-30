@@ -15,10 +15,10 @@ export const contact = {
   /** Set to a full E.164 string (e.g. "+1 415 555 0123") to display phone links. */
   phone: "" as string,
   location: {
-    city: "San Francisco Bay Area",
+    city: "San Francisco ",
     region: "California",
     country: "USA",
-    full: "San Francisco Bay Area, California, USA",
+    full: "San Francisco, California, USA",
   },
   website: "https://xeronia.ai",
   /** Public company LinkedIn URL. Leave empty to hide all LinkedIn references. */

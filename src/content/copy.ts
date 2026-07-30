@@ -527,7 +527,7 @@ const en: Copy = {
     body: [
       "We advise, architect and deliver enterprise technology, artificial intelligence and digital transformation programs for organizations where the stakes and the complexity are both high.",
       "Our work spans strategy, architecture, implementation, modernization and optimization — with senior practitioners engaged from the first workshop through post-go-live improvement.",
-      "Based in the San Francisco Bay Area, we work with leadership teams across North America and Latin America in English and Spanish.",
+      "Based in the San Francisco, California, we work with leadership teams across North America and Latin America in English and Spanish.",
     ],
     notTitle: "What we are not",
     not: [
@@ -764,7 +764,7 @@ const es: Copy = {
     body: [
       "Asesoramos, diseñamos y ejecutamos programas de tecnología empresarial, inteligencia artificial y transformación digital en organizaciones donde la complejidad y lo que está en juego son altos.",
       "Nuestro trabajo abarca estrategia, arquitectura, implementación, modernización y optimización, con profesionales senior involucrados desde el primer taller hasta la mejora posterior a la puesta en marcha.",
-      "Con base en el Área de la Bahía de San Francisco, trabajamos con equipos directivos en Norteamérica y Latinoamérica, en inglés y español.",
+      "Con base en San Francisco, California, trabajamos con equipos directivos en Norteamérica y Latinoamérica, en inglés y español.",
     ],
     notTitle: "Lo que no somos",
     not: [

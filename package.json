@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "build:all": "npm run build && npm --prefix functions run build",
-    "emulators": "firebase emulators:start --only functions,firestore,hosting"
+    "emulators": "firebase emulators:start --only functions,hosting"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -47,7 +47,6 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
-    "firebase": "^12.16.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.575.0",
     "react": "^19.2.0",
@@ -61,7 +60,8 @@
     "tailwindcss": "^4.2.1",
     "tw-animate-css": "^1.3.4",
     "vaul": "^1.1.2",
-    "zod": "^3.24.2"
+    "zod": "^3.24.2",
+    "firebase": "^12.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
